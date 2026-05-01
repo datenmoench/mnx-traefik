@@ -15,12 +15,35 @@ services:
     networks:
       - proxy
     labels:
-      # Catch-all fallback router (handles unmapped domains)
+      # Catch-all fallback for any unmapped hostname.
+      # Serves the holding page over HTTPS using Traefik's built-in
+      # self-signed cert (browsers will show a warning, which is the
+      # right signal for "you hit something that doesn't exist here").
+      # No Let's Encrypt cert is requested — we don't want to fetch
+      # certs for arbitrary hostnames (rate limits / DDoS surface).
       - "traefik.http.routers.fallback.rule=HostRegexp(`{host:.+}`)"
       - "traefik.http.routers.fallback.priority=1"
       - "traefik.http.routers.fallback.entrypoints=websecure"
-      - "traefik.http.routers.fallback.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.fallback.tls=true"
       - "traefik.http.routers.fallback.service=holding-page"
+
+      # Pre-provisioned routers for known monastryx hostnames.
+      # These trigger Let's Encrypt cert acquisition right away so we
+      # have valid TLS even before mnx-infra is deployed. Once mnx-infra
+      # comes up with its own Host() routers (default higher priority),
+      # those override these and serve real traffic instead of the
+      # holding page. Keep priority=1 so mnx-infra always wins.
+      - "traefik.http.routers.api-pre.rule=Host(`api.monastryx.ai`)"
+      - "traefik.http.routers.api-pre.priority=1"
+      - "traefik.http.routers.api-pre.entrypoints=websecure"
+      - "traefik.http.routers.api-pre.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.api-pre.service=holding-page"
+
+      - "traefik.http.routers.hasura-pre.rule=Host(`hasura.monastryx.ai`)"
+      - "traefik.http.routers.hasura-pre.priority=1"
+      - "traefik.http.routers.hasura-pre.entrypoints=websecure"
+      - "traefik.http.routers.hasura-pre.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.hasura-pre.service=holding-page"
 
   holding-page:
     image: nginx:alpine
