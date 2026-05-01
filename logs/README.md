@@ -1,0 +1,1 @@
+Two log files should appear here when Traefik is running. The Access log (showing requests coming in).  And the Traefik application logs which shows messages from Traefik itself - useful for middleware debugging.

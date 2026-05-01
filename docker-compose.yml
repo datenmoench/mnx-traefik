@@ -1,0 +1,38 @@
+services:
+  traefik:
+    image: traefik:v2.10
+    container_name: mnx-traefik
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik/acme.json:/acme.json
+      - ./traefik/config.yml:/etc/traefik/traefik.yml
+      - ./logs:/var/log/traefik
+
+    networks:
+      - proxy
+    labels:
+      # Catch-all fallback router (handles unmapped domains)
+      - "traefik.http.routers.fallback.rule=HostRegexp(`{host:.+}`)"
+      - "traefik.http.routers.fallback.priority=1"
+      - "traefik.http.routers.fallback.entrypoints=websecure"
+      - "traefik.http.routers.fallback.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.fallback.service=holding-page"
+
+  holding-page:
+    image: nginx:alpine
+    container_name: mnx-traefik-holding-page
+    restart: always
+    networks:
+      - proxy
+    volumes:
+      - ./landing:/usr/share/nginx/html
+    labels:
+      - "traefik.http.services.holding-page.loadbalancer.server.port=80"
+
+networks:
+  proxy:
+    external: true
