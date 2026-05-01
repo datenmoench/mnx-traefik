@@ -1,6 +1,6 @@
 services:
   traefik:
-    image: traefik:v2.10
+    image: traefik:v3
     container_name: mnx-traefik
     restart: always
     ports:
@@ -21,7 +21,7 @@ services:
       # right signal for "you hit something that doesn't exist here").
       # No Let's Encrypt cert is requested — we don't want to fetch
       # certs for arbitrary hostnames (rate limits / DDoS surface).
-      - "traefik.http.routers.fallback.rule=HostRegexp(`{host:.+}`)"
+      - "traefik.http.routers.fallback.rule=HostRegexp(`^.+$`)"
       - "traefik.http.routers.fallback.priority=1"
       - "traefik.http.routers.fallback.entrypoints=websecure"
       - "traefik.http.routers.fallback.tls=true"

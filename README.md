@@ -2,7 +2,7 @@
 
 Reverse proxy and TLS termination for the monastryx platform on Hetzner.
 
-This stack runs a single instance of [Traefik v2.10](https://doc.traefik.io/traefik/) on the VPS as the public entry point. It owns ports 80 and 443, terminates TLS, fetches and renews Let's Encrypt certificates automatically, and routes traffic to the right container by hostname based on labels declared in each service's own `docker-compose.yml`.
+This stack runs a single instance of [Traefik v3](https://doc.traefik.io/traefik/) on the VPS as the public entry point. It owns ports 80 and 443, terminates TLS, fetches and renews Let's Encrypt certificates automatically, and routes traffic to the right container by hostname based on labels declared in each service's own `docker-compose.yml`.
 
 ## How services attach themselves
 
@@ -36,6 +36,6 @@ docker compose up -d
 
 ## IP whitelist
 
-The `ipwhitelist` middleware in `config.yml` is *defined* but only applies to routers that explicitly reference it. Public services (e.g. the GraphQL endpoint) are reachable from anywhere; locked-down endpoints (e.g. the Hasura console) attach `ipwhitelist@file` to their router via labels.
+The `ipallowlist` middleware in `config.yml` is *defined* but only applies to routers that explicitly reference it. Public services (e.g. the GraphQL endpoint) are reachable from anywhere; locked-down endpoints (e.g. the Hasura console) attach `ipallowlist@file` to their router via labels.
 
 Update the `sourceRange:` list with the IPs you want to allow before exposing whitelisted services.

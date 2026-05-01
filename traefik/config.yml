@@ -26,14 +26,14 @@ providers:
 
 http:
   middlewares:
-    ipwhitelist:
-      ipWhiteList:
+    ipallowlist:
+      ipAllowList:
         sourceRange:
-          # TODO: replace with the IPs that should reach IP-whitelisted endpoints
+          # TODO: replace with the IPs that should reach IP-restricted endpoints
           # (e.g. hasura.monastryx.ai console). Find your current IP at
           # https://www.whatismyip.com and add it as a /32. The 172.18.0.1/32
           # entry is the Docker bridge gateway, which lets sibling containers
-          # on the host reach whitelisted services.
+          # on the host reach restricted services.
           - "172.18.0.1/32"  # Docker bridge gateway
 
 api:
