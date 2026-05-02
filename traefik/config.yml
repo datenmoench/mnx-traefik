@@ -21,7 +21,9 @@ providers:
     watch: true
     network: proxy
   file:
-    filename: /etc/traefik/dynamic.yml
+    # Watch a directory rather than a single file — single-file bind mounts
+    # break Traefik's inotify-based file watcher in Docker.
+    directory: /etc/traefik/dynamic
     watch: true
 
 # NOTE: routers, services, and middlewares (like ipallowlist) live in
