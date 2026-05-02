@@ -20,6 +20,10 @@ providers:
   docker:
     watch: true
     network: proxy
+    # Containers must opt in with `traefik.enable=true` to be routed.
+    # Default-on (true) caused noisy log warnings for unrelated containers
+    # (e.g. mnx-connections-db) being mis-discovered.
+    exposedByDefault: false
   file:
     # Watch a directory rather than a single file — single-file bind mounts
     # break Traefik's inotify-based file watcher in Docker.
