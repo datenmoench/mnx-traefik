@@ -47,15 +47,6 @@ services:
       - "traefik.http.routers.hasura-pre.tls.certresolver=letsencrypt"
       - "traefik.http.routers.hasura-pre.service=holding-page"
 
-      # auth.monastryx.ai — DNS exists but no service routes here yet (OAuth
-      # refactor pending, see mnx-backend/docker-compose.yml). Keep priority=1
-      # so the cert is pre-fetched; backend will override with priority=20+
-      # once the refactor lands and OAuth callbacks are FastAPI routes.
-      - "traefik.http.routers.auth-pre.rule=Host(`auth.monastryx.ai`)"
-      - "traefik.http.routers.auth-pre.priority=1"
-      - "traefik.http.routers.auth-pre.entrypoints=websecure"
-      - "traefik.http.routers.auth-pre.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.auth-pre.service=holding-page"
 
   holding-page:
     image: nginx:alpine
