@@ -13,8 +13,9 @@ http:
         sourceRange:
           # IPs allowed to reach restricted endpoints (e.g. hasura.monastryx.ai console).
           # Add a /32 per IP. Find current IP at https://www.whatismyip.com.
-          # Update when working from a new network (coffee shop, mobile hotspot, etc).
+          # Update when working from a new network (coffee shop, mobile hotspot, etc),
+          # and REMOVE the entry when you leave it. Entries do not expire, so a
+          # stale one is an open door for whoever holds that address next — this
+          # list carried two dead networks until 2026-08-10.
           - "172.18.0.1/32"      # Docker bridge gateway (host-internal services)
           - "62.157.64.176/32"   # paul.geisler@datenmoench.ai (home office)
-          - "176.4.205.82/32"    # paul.geisler@datenmoench.ai (previous network)
-          - "84.173.57.26/32"    # paul.geisler@datenmoench.ai (current network, 2026-07-21)
