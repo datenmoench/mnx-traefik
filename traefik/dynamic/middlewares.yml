@@ -19,3 +19,4 @@ http:
           # list carried two dead networks until 2026-08-10.
           - "172.18.0.1/32"      # Docker bridge gateway (host-internal services)
           - "62.157.64.176/32"   # paul.geisler@datenmoench.ai (home office)
+          - "84.173.57.26/32"    # paul.geisler@datenmoench.ai (2026-08-14)
