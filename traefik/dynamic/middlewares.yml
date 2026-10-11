@@ -21,3 +21,4 @@ http:
           - "62.157.64.176/32"   # paul.geisler@datenmoench.ai (home office)
           - "84.173.49.242/32"   # paul.geisler@datenmoench.ai (2026-10-06)
           - "62.157.72.164/32"   # paul.geisler@datenmoench.ai (2026-10-09)
+          - "80.152.187.1/32"    # paul.geisler@datenmoench.ai (2026-10-11, co-working space — TEMPORARY, remove when leaving)
