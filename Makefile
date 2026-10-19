@@ -10,14 +10,26 @@ DIR  := ~/mnx-traefik
 
 help:
 	@echo "Targets:"
-	@echo "  deploy   git pull + docker compose up -d --build  (config is baked into the images)"
+	@echo "  deploy   pull the edge images CI built for TAG (default: HEAD) and restart"
 	@echo "  logs     tail traefik logs (stdout; INFO level by default)"
 	@echo "  restart  restart traefik"
 	@echo "  status   show docker compose ps"
 
+# A deploy names a commit (TAG, default: the local HEAD, pushed) and pulls
+# the images CI built for it; nothing is built on the box. `git pull` only
+# refreshes the compose file until the bundle step retires the checkout.
+TAG ?= $(shell git rev-parse HEAD)
+
 deploy:
-	@echo "==> deploying mnx-traefik on VPS..."
-	$(SSH) $(VPS) 'cd $(DIR) && git pull && docker compose up -d --build'
+	@git fetch -q origin main && test "$$(git rev-parse $(TAG))" = "$$(git merge-base $(TAG) origin/main)" \
+	  || { echo "commit $(TAG) is not on origin/main — push first"; exit 1; }
+	@echo "==> deploying mnx-traefik $(TAG) on VPS..."
+	$(SSH) $(VPS) 'set -e; cd $(DIR) && git pull -q; touch .env; \
+	  grep -q "^MNX_IMAGE_TAG=" .env && sed -i "s/^MNX_IMAGE_TAG=.*/MNX_IMAGE_TAG=$(TAG)/" .env || echo "MNX_IMAGE_TAG=$(TAG)" >> .env; \
+	  for i in $$(seq 1 40); do docker manifest inspect ghcr.io/datenmoench/mnx-traefik:$(TAG) >/dev/null 2>&1 && break; \
+	    [ $$i -eq 40 ] && { echo "image for $(TAG) never appeared on ghcr.io — is the images workflow green?"; exit 1; }; \
+	    echo "waiting for ghcr.io/datenmoench/mnx-traefik:$(TAG) (CI still building?)"; sleep 15; done; \
+	  docker compose pull -q && docker compose up -d'
 
 logs:
 	$(SSH) $(VPS) 'docker logs -f --tail 200 mnx-traefik'
