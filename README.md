@@ -13,7 +13,7 @@ Other monastryx services (e.g. `mnx-infra`'s Hasura) attach to the **external Do
 The configuration is baked into two images built by CI on every push to
 `main` (`.github/workflows/images.yml`) and published to ghcr.io:
 `mnx-traefik` (traefik v3 + `traefik/config.yml` + `traefik/dynamic/`) and
-`mnx-holding-page` (nginx + `landing/`). A box pulls them by tag
+`mnx-holding-page` (nginx + `landing/`). A cell pulls them by tag
 (`MNX_IMAGE_TAG`, default `main`); it never needs this repository. The only
 state is the Let's Encrypt account and certificates, in the named volume
 `mnx-traefik_acme` (`/acme/acme.json` inside the container; traefik creates
@@ -32,7 +32,7 @@ docker network create proxy
 docker compose pull && docker compose up -d
 ```
 
-Moving an existing box whose certificates live in the old bind-mounted
+Moving an existing machine whose certificates live in the old bind-mounted
 `traefik/acme.json` (one-time, before the first `up` of the image-based
 stack, so the certificates are not re-requested):
 

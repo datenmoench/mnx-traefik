@@ -16,8 +16,8 @@ help:
 	@echo "  status   show docker compose ps"
 
 # A deploy names a commit (TAG, default: the local HEAD, pushed) and pulls
-# the images CI built for it; nothing is built on the box. The compose file
-# itself is pulled from the registry (ORAS artifact) — the box has no checkout.
+# the images CI built for it; nothing is built on the machine. The compose file
+# itself is pulled from the registry (ORAS artifact) — the machine has no checkout.
 TAG ?= $(shell git rev-parse HEAD)
 
 deploy:
