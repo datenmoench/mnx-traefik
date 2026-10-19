@@ -1,6 +1,8 @@
 # Images are built by CI (.github/workflows/images.yml) and pulled by tag;
 # `build:` stays so a checkout can still build them locally. MNX_IMAGE_TAG
 # names the commit a box runs (the deploy sets it; `main` = the head).
+name: mnx-traefik
+
 services:
   traefik:
     image: ghcr.io/datenmoench/mnx-traefik:${MNX_IMAGE_TAG:-main}
