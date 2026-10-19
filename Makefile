@@ -10,17 +10,17 @@ DIR  := ~/mnx-traefik
 
 help:
 	@echo "Targets:"
-	@echo "  deploy   git pull + docker compose up -d  (image upgrades / compose changes)"
-	@echo "  logs     tail traefik logs (file-mounted; INFO level by default)"
-	@echo "  restart  restart traefik (re-reads config.yml; faster than full deploy)"
+	@echo "  deploy   git pull + docker compose up -d --build  (config is baked into the images)"
+	@echo "  logs     tail traefik logs (stdout; INFO level by default)"
+	@echo "  restart  restart traefik"
 	@echo "  status   show docker compose ps"
 
 deploy:
 	@echo "==> deploying mnx-traefik on VPS..."
-	$(SSH) $(VPS) 'cd $(DIR) && git pull && docker compose up -d'
+	$(SSH) $(VPS) 'cd $(DIR) && git pull && docker compose up -d --build'
 
 logs:
-	$(SSH) $(VPS) 'tail -f -n 200 ~/mnx-traefik/logs/traefik.log'
+	$(SSH) $(VPS) 'docker logs -f --tail 200 mnx-traefik'
 
 restart:
 	$(SSH) $(VPS) 'cd $(DIR) && docker compose restart traefik'

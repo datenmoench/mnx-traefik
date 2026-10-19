@@ -1,6 +1,10 @@
+# Images are built by CI (.github/workflows/images.yml) and pulled by tag;
+# `build:` stays so a checkout can still build them locally. MNX_IMAGE_TAG
+# names the commit a box runs (the deploy sets it; `main` = the head).
 services:
   traefik:
-    image: traefik:v3
+    image: ghcr.io/datenmoench/mnx-traefik:${MNX_IMAGE_TAG:-main}
+    build: ./traefik
     container_name: mnx-traefik
     restart: always
     ports:
@@ -8,10 +12,7 @@ services:
       - "443:443"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./traefik/acme.json:/acme.json
-      - ./traefik/config.yml:/etc/traefik/traefik.yml
-      - ./traefik/dynamic:/etc/traefik/dynamic:ro
-      - ./logs:/var/log/traefik
+      - acme:/acme
 
     networks:
       - proxy
@@ -49,13 +50,12 @@ services:
 
 
   holding-page:
-    image: nginx:alpine
+    image: ghcr.io/datenmoench/mnx-holding-page:${MNX_IMAGE_TAG:-main}
+    build: ./landing
     container_name: mnx-traefik-holding-page
     restart: always
     networks:
       - proxy
-    volumes:
-      - ./landing:/usr/share/nginx/html
     labels:
       - "traefik.enable=true"
       - "traefik.http.services.holding-page.loadbalancer.server.port=80"
@@ -63,3 +63,7 @@ services:
 networks:
   proxy:
     external: true
+
+volumes:
+  # Let's Encrypt account + certificates; the one piece of state here.
+  acme:

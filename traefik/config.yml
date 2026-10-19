@@ -13,7 +13,8 @@ certificatesResolvers:
   letsencrypt:
     acme:
       email: paul.geisler@datenmoench.ai
-      storage: acme.json
+      # The `acme` named volume; traefik creates the file (mode 600) itself.
+      storage: /acme/acme.json
       tlsChallenge: {}
 
 providers:
@@ -36,10 +37,10 @@ providers:
 api:
   dashboard: false
 
+# Both logs go to stdout/stderr (no filePath): `docker logs mnx-traefik`,
+# like every other container on the box.
 accessLog:
-  filePath: "/var/log/traefik/access.log"
   format: json
 
 log:
   level: INFO
-  filePath: "/var/log/traefik/traefik.log"

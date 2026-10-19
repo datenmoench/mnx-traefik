@@ -8,31 +8,46 @@ This stack runs a single instance of [Traefik v3](https://doc.traefik.io/traefik
 
 Other monastryx services (e.g. `mnx-infra`'s Hasura) attach to the **external Docker network `proxy`** and announce their routing rules via container labels. Traefik watches the Docker socket and picks them up live — no traefik restart needed when a new service comes up.
 
+## Images
+
+The configuration is baked into two images built by CI on every push to
+`main` (`.github/workflows/images.yml`) and published to ghcr.io:
+`mnx-traefik` (traefik v3 + `traefik/config.yml` + `traefik/dynamic/`) and
+`mnx-holding-page` (nginx + `landing/`). A box pulls them by tag
+(`MNX_IMAGE_TAG`, default `main`); it never needs this repository. The only
+state is the Let's Encrypt account and certificates, in the named volume
+`mnx-traefik_acme` (`/acme/acme.json` inside the container; traefik creates
+the file itself). Both logs go to stdout: `docker logs mnx-traefik`.
+
+Changing the allowlist or any traefik setting is therefore a commit, a push,
+and a deploy — the running container never has its config edited in place.
+
 ## First-time setup on the VPS
 
 ```bash
 # Create the shared external network (once per host)
 docker network create proxy
 
-# Clone this repo
-cd ~ && git clone https://github.com/datenmoench/mnx-traefik.git
-cd mnx-traefik
+# Bring up traefik + the fallback holding page (pulls the images)
+docker compose pull && docker compose up -d
+```
 
-# Create the cert storage file with strict permissions
-# (Let's Encrypt refuses to write to it otherwise)
-touch traefik/acme.json
-chmod 600 traefik/acme.json
+Moving an existing box whose certificates live in the old bind-mounted
+`traefik/acme.json` (one-time, before the first `up` of the image-based
+stack, so the certificates are not re-requested):
 
-# Bring up traefik + the fallback holding page
-docker compose up -d
+```bash
+docker volume create mnx-traefik_acme
+docker run --rm -v mnx-traefik_acme:/acme -v ~/mnx-traefik/traefik/acme.json:/src:ro alpine \
+  sh -c 'cp /src /acme/acme.json && chmod 600 /acme/acme.json'
 ```
 
 ## Configuration
 
-- **`traefik/config.yml`** — static config: entrypoints, Let's Encrypt resolver, IP whitelist middleware, logging.
-- **`docker-compose.yml`** — runtime config: ports, volumes, the catch-all fallback router pointing at the holding-page container.
+- **`traefik/config.yml`** — static config: entrypoints, Let's Encrypt resolver, logging.
+- **`traefik/dynamic/`** — dynamic config read by the file provider: the IP allowlist middleware.
+- **`docker-compose.yml`** — runtime config: ports, the `acme` volume, the catch-all fallback router pointing at the holding-page container.
 - **`landing/`** — static HTML served by the fallback when someone hits an unmapped hostname.
-- **`logs/`** — traefik access + error logs (gitignored).
 
 ## IP whitelist
 
