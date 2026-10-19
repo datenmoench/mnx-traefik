@@ -38,13 +38,13 @@ services:
       # comes up with its own Host() routers (default higher priority),
       # those override these and serve real traffic instead of the
       # holding page. Keep priority=1 so mnx-infra always wins.
-      - "traefik.http.routers.api-pre.rule=Host(`${MNX_API_HOST:-api.monastryx.ai}`)"
+      - "traefik.http.routers.api-pre.rule=Host(`${MNX_API_HOST:?set MNX_API_HOST in .env (the hostname this box answers to)}`)"
       - "traefik.http.routers.api-pre.priority=1"
       - "traefik.http.routers.api-pre.entrypoints=websecure"
       - "traefik.http.routers.api-pre.tls.certresolver=letsencrypt"
       - "traefik.http.routers.api-pre.service=holding-page"
 
-      - "traefik.http.routers.hasura-pre.rule=Host(`${MNX_HASURA_HOST:-hasura.monastryx.ai}`)"
+      - "traefik.http.routers.hasura-pre.rule=Host(`${MNX_HASURA_HOST:?set MNX_HASURA_HOST in .env (the hostname this box answers to)}`)"
       - "traefik.http.routers.hasura-pre.priority=1"
       - "traefik.http.routers.hasura-pre.entrypoints=websecure"
       - "traefik.http.routers.hasura-pre.tls.certresolver=letsencrypt"
