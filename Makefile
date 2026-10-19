@@ -24,7 +24,9 @@ deploy:
 	@git fetch -q origin main && test "$$(git rev-parse $(TAG))" = "$$(git merge-base $(TAG) origin/main)" \
 	  || { echo "commit $(TAG) is not on origin/main — push first"; exit 1; }
 	@echo "==> deploying mnx-traefik $(TAG) on VPS..."
-	$(SSH) $(VPS) 'set -e; cd $(DIR) && ~/.local/bin/oras pull -o . ghcr.io/datenmoench/mnx-traefik-compose:$(TAG) >/dev/null; touch .env; \
+	$(SSH) $(VPS) 'set -e; cd $(DIR) && for i in $$(seq 1 40); do ~/.local/bin/oras pull -o . ghcr.io/datenmoench/mnx-traefik-compose:$(TAG) >/dev/null 2>&1 && break; \
+	    [ $$i -eq 40 ] && { echo "compose file for $(TAG) never appeared on ghcr.io — is the images workflow green?"; exit 1; }; \
+	    echo "waiting for ghcr.io/datenmoench/mnx-traefik-compose:$(TAG) (CI still publishing?)"; sleep 15; done; touch .env; \
 	  grep -q "^MNX_IMAGE_TAG=" .env && sed -i "s/^MNX_IMAGE_TAG=.*/MNX_IMAGE_TAG=$(TAG)/" .env || echo "MNX_IMAGE_TAG=$(TAG)" >> .env; \
 	  for i in $$(seq 1 40); do docker manifest inspect ghcr.io/datenmoench/mnx-traefik:$(TAG) >/dev/null 2>&1 && break; \
 	    [ $$i -eq 40 ] && { echo "image for $(TAG) never appeared on ghcr.io — is the images workflow green?"; exit 1; }; \
