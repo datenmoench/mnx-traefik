@@ -3,7 +3,7 @@
 # All targets operate against the VPS over SSH using ~/.ssh/id_hetzner.
 
 VPS  := monastryx@178.104.52.253
-SSH  := ssh -o IdentitiesOnly=yes -o IdentityFile=~/.ssh/id_hetzner
+SSH  := ssh -o IdentitiesOnly=yes -o IdentityFile=~/.ssh/id_hetzner -o ServerAliveInterval=30
 DIR  := ~/mnx-traefik
 
 .PHONY: deploy logs restart status help
