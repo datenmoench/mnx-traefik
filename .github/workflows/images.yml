@@ -42,11 +42,12 @@ jobs:
             ghcr.io/datenmoench/${{ matrix.name }}:${{ github.sha }}
             ghcr.io/datenmoench/${{ matrix.name }}:main
 
-  # The stack's compose file, published as a versioned OCI artifact next to
-  # the images (same registry, same tag, same pull token). A box pulls it
-  # with `docker compose -f oci://ghcr.io/datenmoench/mnx-traefik-compose:<tag>`
-  # and never needs this repository. Only the file travels: variables stay
-  # unresolved (the box's .env fills them) and no env values are included.
+  # The stack's compose file (plus .env.example as its documentation),
+  # pushed byte-for-byte with ORAS as a versioned OCI artifact next to the
+  # images: same registry, same tag, same pull token. A box pulls it into
+  # ~/mnx-traefik/docker-compose.yml and never needs this repository; its own
+  # .env fills the variables. (`docker compose publish` was not usable: it
+  # refuses or embeds `environment:` values.)
   bundle:
     runs-on: ubuntu-latest
     steps:
@@ -58,7 +59,11 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - uses: oras-project/setup-oras@v1
+
       - name: publish the compose file
         run: |
-          yes | docker compose publish ghcr.io/datenmoench/mnx-traefik-compose:${{ github.sha }}
-          yes | docker compose publish ghcr.io/datenmoench/mnx-traefik-compose:main
+          oras push ghcr.io/datenmoench/mnx-traefik-compose:${{ github.sha }} \
+            --artifact-type application/vnd.monastryx.compose \
+            docker-compose.yml:text/yaml .env.example:text/plain
+          oras tag ghcr.io/datenmoench/mnx-traefik-compose:${{ github.sha }} main
