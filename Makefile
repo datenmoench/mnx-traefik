@@ -31,7 +31,7 @@ deploy:
 	  for i in $$(seq 1 40); do docker manifest inspect ghcr.io/datenmoench/mnx-traefik:$(TAG) >/dev/null 2>&1 && break; \
 	    [ $$i -eq 40 ] && { echo "image for $(TAG) never appeared on ghcr.io — is the images workflow green?"; exit 1; }; \
 	    echo "waiting for ghcr.io/datenmoench/mnx-traefik:$(TAG) (CI still building?)"; sleep 15; done; \
-	  docker compose pull -q && docker compose up -d'
+	  docker compose pull -q && docker compose up -d && docker image prune -af --filter until=168h >/dev/null'
 
 logs:
 	$(SSH) $(VPS) 'docker logs -f --tail 200 mnx-traefik'
