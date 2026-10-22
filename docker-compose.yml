@@ -5,7 +5,7 @@ name: mnx-traefik
 
 services:
   traefik:
-    image: ghcr.io/datenmoench/mnx-traefik:${MNX_IMAGE_TAG:-main}
+    image: ${MNX_REGISTRY:-ghcr.io}/datenmoench/mnx-traefik:${MNX_IMAGE_TAG:-main}
     build: ./traefik
     container_name: mnx-traefik
     restart: always
@@ -52,7 +52,7 @@ services:
 
 
   holding-page:
-    image: ghcr.io/datenmoench/mnx-holding-page:${MNX_IMAGE_TAG:-main}
+    image: ${MNX_REGISTRY:-ghcr.io}/datenmoench/mnx-holding-page:${MNX_IMAGE_TAG:-main}
     build: ./landing
     container_name: mnx-traefik-holding-page
     restart: always
