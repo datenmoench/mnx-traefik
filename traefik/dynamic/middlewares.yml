@@ -3,21 +3,10 @@
 # Why a separate file: in v3 the static `traefik.yml` only carries entrypoints,
 # providers, certificatesResolvers, api, log, etc. Anything HTTP-routing-related
 # (routers, services, middlewares) must come from a provider. The docker
-# provider handles container labels; this file is the source for things that
-# aren't tied to a specific container — like the ipallowlist middleware below.
-
-http:
-  middlewares:
-    ipallowlist:
-      ipAllowList:
-        sourceRange:
-          # IPs allowed to reach restricted endpoints (e.g. hasura.monastryx.ai console).
-          # Add a /32 per IP. Find current IP at https://www.whatismyip.com.
-          # Update when working from a new network (coffee shop, mobile hotspot, etc),
-          # and REMOVE the entry when you leave it. Entries do not expire, so a
-          # stale one is an open door for whoever holds that address next — this
-          # list carried two dead networks until 2026-08-10.
-          - "172.18.0.1/32"      # Docker bridge gateway (host-internal services)
-          - "62.157.64.176/32"   # paul.geisler@datenmoench.ai (home office)
-          - "84.173.49.242/32"   # paul.geisler@datenmoench.ai (2026-10-06)
-          - "62.157.72.164/32"   # paul.geisler@datenmoench.ai (2026-10-09)
+# provider handles container labels; this directory is the source for things
+# that aren't tied to a specific container.
+#
+# Empty today. The ipallowlist middleware that lived here guarded the Hasura
+# console, which has had no route through the edge since 2026-10-21 (Hasura
+# listens on the machine's loopback; `make tunnel` reaches it); it was removed
+# 2026-10-25 rather than ship the operator's addresses in every image.

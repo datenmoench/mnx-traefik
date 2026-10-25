@@ -31,8 +31,8 @@ providers:
     directory: /etc/traefik/dynamic
     watch: true
 
-# NOTE: routers, services, and middlewares (like ipallowlist) live in
-# traefik/dynamic.yml — Traefik v3 doesn't accept them in this static file.
+# NOTE: routers, services, and middlewares not tied to a container live in
+# traefik/dynamic/ — Traefik v3 doesn't accept them in this static file.
 
 api:
   dashboard: false

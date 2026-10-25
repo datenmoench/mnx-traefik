@@ -45,12 +45,6 @@ docker run --rm -v mnx-traefik_acme:/acme -v ~/mnx-traefik/traefik/acme.json:/sr
 ## Configuration
 
 - **`traefik/config.yml`** — static config: entrypoints, Let's Encrypt resolver, logging.
-- **`traefik/dynamic/`** — dynamic config read by the file provider: the IP allowlist middleware.
+- **`traefik/dynamic/`** — dynamic config read by the file provider: routers, services and middlewares not tied to a container (none today).
 - **`docker-compose.yml`** — runtime config: ports, the `acme` volume, the catch-all fallback router pointing at the holding-page container.
 - **`landing/`** — static HTML served by the fallback when someone hits an unmapped hostname.
-
-## IP whitelist
-
-The `ipallowlist` middleware in `config.yml` is *defined* but only applies to routers that explicitly reference it. Public services (e.g. the GraphQL endpoint) are reachable from anywhere; locked-down endpoints (e.g. the Hasura console) attach `ipallowlist@file` to their router via labels.
-
-Update the `sourceRange:` list with the IPs you want to allow before exposing whitelisted services.
