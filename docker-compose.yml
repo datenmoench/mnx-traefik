@@ -62,6 +62,33 @@ services:
       - "traefik.enable=true"
       - "traefik.http.services.holding-page.loadbalancer.server.port=80"
 
+  # Central only (COMPOSE_PROFILES=central in its .env): the console's old
+  # name, console.<domain>, redirected to app.<domain> for every mail and
+  # bookmark that still carries it (2026-10-31). A cell never had the old
+  # name, so it never activates this; a router on a profile-gated container
+  # is the one way to keep a hostname — and its certificate request — off
+  # the cells. The holding page is only the service the router needs. The
+  # defaults below never serve: compose interpolates every service's labels
+  # before it applies the profiles, so a cell's empty values need one.
+  console-legacy:
+    image: ${MNX_REGISTRY:-ghcr.io}/datenmoench/mnx-holding-page:${MNX_IMAGE_TAG:-main}
+    container_name: mnx-traefik-console-legacy
+    profiles: [central]
+    restart: always
+    networks:
+      - proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.console-legacy.loadbalancer.server.port=80"
+      - "traefik.http.routers.console-legacy.rule=Host(`${MNX_CONSOLE_LEGACY_HOST:-console.invalid}`)"
+      - "traefik.http.routers.console-legacy.entrypoints=websecure"
+      - "traefik.http.routers.console-legacy.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.console-legacy.service=console-legacy"
+      - "traefik.http.routers.console-legacy.middlewares=console-legacy-redirect"
+      - "traefik.http.middlewares.console-legacy-redirect.redirectregex.regex=^https://[^/]+/(.*)"
+      - "traefik.http.middlewares.console-legacy-redirect.redirectregex.replacement=https://${MNX_CONSOLE_HOST:-app.invalid}/$${1}"
+      - "traefik.http.middlewares.console-legacy-redirect.redirectregex.permanent=true"
+
 networks:
   proxy:
     external: true
